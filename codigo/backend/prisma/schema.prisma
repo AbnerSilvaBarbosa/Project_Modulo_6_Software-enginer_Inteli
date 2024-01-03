@@ -1,0 +1,154 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  idUser    Int     @id @default(autoincrement())
+  fullName  String
+  email     String  @unique
+  password  String
+  subName   String
+  coins     Int     @default(0)
+  isManager Boolean @default(false)
+  idManager Int
+
+  rankUser         RankUser[]
+  userTags         UserTags[]
+  userApplyProject UserApplyProject[]
+  UserLikePost     UserLikePost[]
+}
+
+model Project {
+  idProject   Int      @id @default(autoincrement())
+  name        String
+  description String
+  dataStart   DateTime
+  duration    Int
+  statusApply Boolean
+  newOrGoing  Boolean
+  idUser      Int
+  idManager   Int
+
+  projectTag       ProjectTag[]
+  userApplyProject UserApplyProject[]
+}
+
+model Post {
+  idPost   Int      @id @default(autoincrement())
+  article  String
+  time     DateTime
+  ups      Int
+  downs    Int
+  idUser   Int
+  image    String
+  qntLikes Int
+
+  postsTags    PostsTags[]
+  UserLikePost UserLikePost[]
+}
+
+model Comment {
+  idComment Int    @id @default(autoincrement())
+  idPost    Int
+  idUser    Int
+  comment   String
+}
+
+model Techs {
+  idTag    Int    @id @default(autoincrement())
+  techName String
+
+  projectTag ProjectTag[]
+  userTags   UserTags[]
+  postsTags  PostsTags[]
+}
+
+model ProjectComplaint {
+  idProjectComplaint Int    @id @default(autoincrement())
+  complaintReason    String
+  feedback           String
+  idProject          Int
+}
+
+model PostComplaint {
+  idPostComplaint Int    @id @default(autoincrement())
+  complaintReason String
+  feedback        String
+  idPost          Int
+}
+
+model CommentComplaint {
+  idCommentComplaint Int    @id @default(autoincrement())
+  complaintReason    String
+  feedback           String
+  idComment          Int
+}
+
+model ProjectTag {
+  idProject Int
+  idTag     Int
+
+  Project Project @relation(fields: [idProject], references: [idProject])
+  Techs   Techs   @relation(fields: [idTag], references: [idTag])
+
+  @@id([idProject, idTag])
+}
+
+model UserTags {
+  idUser Int
+  idTag  Int
+  level  Int
+
+  User  User  @relation(fields: [idUser], references: [idUser])
+  Techs Techs @relation(fields: [idTag], references: [idTag])
+
+  @@id([idUser, idTag])
+}
+
+model PostsTags {
+  idPost Int
+  idTag  Int
+
+  Post  Post  @relation(fields: [idPost], references: [idPost])
+  Techs Techs @relation(fields: [idTag], references: [idTag])
+
+  @@id([idPost, idTag])
+}
+
+model UserApplyProject {
+  idUser    Int
+  idProject Int
+  role      String
+
+  User    User    @relation(fields: [idUser], references: [idUser])
+  Project Project @relation(fields: [idProject], references: [idProject])
+
+  @@id([idUser, idProject])
+}
+
+model RankUser {
+  idUser Int
+  points Int
+
+  User User @relation(fields: [idUser], references: [idUser])
+
+  @@id([idUser])
+}
+
+model UserLikePost {
+  idUser Int
+  idPost Int
+
+  User User @relation(fields: [idUser], references: [idUser])
+  Post Post @relation(fields: [idPost], references: [idPost])
+
+  @@id([idUser, idPost])
+}
